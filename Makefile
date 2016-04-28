@@ -17,6 +17,7 @@ TARGETS= \
 	brushes/1D.multi.js \
 	brushes/angular.js \
 	interactive.js \
+	histograms.js \
 	version.js \
 	end.js \
 	renderQueue.js
