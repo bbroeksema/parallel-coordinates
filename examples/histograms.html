@@ -1,0 +1,47 @@
+<!doctype html>
+<head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+  <meta content="utf-8" http-equiv="encoding">
+  <title>Histogram Example</title>
+  <link rel="stylesheet" type="text/css" href="../d3.parcoords.css">
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="lib/d3.js"></script>
+  <script src="lib/d3-array-0.7.1.js"></script>
+  <script src="../d3.parcoords.js"></script>
+</head>
+
+<div id="example" class="parcoords" style="width:1100px;height:600px;">
+</div>
+
+
+<script>
+// quantitative color scale
+var blue_to_brown = d3.scale.linear()
+  .domain([9, 50])
+  .range(["steelblue", "brown"])
+  .interpolate(d3.interpolateLab);
+
+var color = function(d) { return blue_to_brown(d['carbohydrate (g)']); };
+
+var parcoords = d3.parcoords()("#example")
+    .color(color)
+    .alpha(0.4)
+    .dimensionTitleRotation(-10);
+
+// load csv file and create the chart
+d3.csv('data/nutrients.csv', function(data) {
+  parcoords.data(data);
+
+  parcoords
+    .hideAxis(["name"])
+    .composite("darker")
+    .render()
+    .shadows()
+    .reorderable()
+    .brushMode("1D-axes")  // enable brushing
+    .hist.render();
+});
+</script>
+
+
+
