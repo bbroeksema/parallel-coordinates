@@ -3,7 +3,14 @@
     show: false,
     defaulBinCount: 10,
     cache: undefined,
-    updateEvent: "brush"
+    updateEvent: "brush",
+    defaultColorConfiguration: {
+      fill: 'steelblue',
+      opacity: 0.9
+    },
+    colorConfiguration: {
+       "vitaminc (g)": { fill: 'orange', opacity: 0.4 }
+    }
   }
 
   var histogram = {}
@@ -58,6 +65,34 @@
     dim.binCount = count;
     return pc;
   }
+
+  histogram.defaultFillColor = function(fill) {
+    if (arguments.length === 0) {
+      return m_histograms.defaultColorConfiguration.fill;
+    }
+
+    if (m_histograms.defaultColorConfiguration.fill !== fill) {
+      m_histograms.defaultColorConfiguration.fill = fill;
+      render();
+    }
+
+    return pc;
+  }
+
+  histogram.defaultFillOpacity = function(opacity) {
+    if (arguments.length === 0) {
+      return m_histograms.defaultColorConfiguration.opacity;
+    }
+
+    if (m_histograms.defaultColorConfiguration.opacity !== opacity) {
+      m_histograms.defaultColorConfiguration.opacity = opacity;
+      render();
+    }
+
+    return pc;
+  }
+
+
 
   histogram.enabled = function(enabled) {
     if (arguments.lengt === 0) {
@@ -149,13 +184,13 @@
       });
 
     // Now render bars
-    g.each(function(d) {
+    g.each(function(hist) {
       var bars = d3.select(this).selectAll('rect')
         .data(function(d) { return d.hist; });
 
       var yscale = d3.scale.linear()
-        .domain([0, d.hist.length])
-        .range(pc.dimensions()[d.dim].yscale.range())
+        .domain([0, hist.hist.length])
+        .range(pc.dimensions()[hist.dim].yscale.range())
 
       bars.enter().append('rect');
       bars.exit().remove();
@@ -164,8 +199,18 @@
         .attr('y', function(d, i) { return yscale(i + 1) + 1; })
         .attr('height', function(d, i) { return yscale(i) - yscale(i + 1) - 1; })
         .attr('width', function(d) { return d.freq / d.total * 40; })
-        .style('fill', 'steelblue')
-        .style('fill-opacity', 0.9);
+        .style('fill', function() {
+           if (m_histograms.colorConfiguration[hist.dim]) {
+              return m_histograms.colorConfiguration[hist.dim].fill;
+           }
+           return m_histograms.defaultColorConfiguration.fill;
+        })
+        .style('fill-opacity', function() {
+           if (m_histograms.colorConfiguration[hist.dim]) {
+              return m_histograms.colorConfiguration[hist.dim].opacity;
+           }
+           return m_histograms.defaultColorConfiguration.opacity;
+        });
     });
   }
 
