@@ -2351,6 +2351,24 @@ function position(d) {
     return pc;
   }
 
+  histogram.enabled = function(enabled) {
+    if (arguments.lengt === 0) {
+      return pc.on('render.histograms') !== undefined
+    }
+
+    if (enabled) {
+      pc.on('render.histograms', render)
+      var data = pc.brushed() ? pc.brushed() : pc.data();
+      render();
+    } else {
+      pc.on('render.histograms', null)
+      pc.histograms.selectAll('.histogram').remove();
+    }
+
+    return pc;
+
+  }
+
   function init() {
     var dims = pc.dimensions();
     m_histograms.cache = {};
@@ -2358,6 +2376,10 @@ function position(d) {
     Object.keys(dims).forEach(function(dimName) {
       var dim = dims[dimName];
       var hist;
+
+      if (dims[dimName].yscale === undefined) {
+        pc.autoscale();
+      }
 
       // TODO: For now we only create histograms for numerical variables.
       if (dim.type === "number") {
@@ -2375,7 +2397,7 @@ function position(d) {
     return m_histograms.cache;
   }
 
-  histogram.render = function() {
+  function render() {
     var data = pc.brushed() ? pc.brushed() : pc.data();
     var dims = pc.dimensions();
     var cache = m_histograms.cache ? m_histograms.cache : init();

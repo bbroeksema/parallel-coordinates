@@ -12,6 +12,9 @@
 
 <div id="example" class="parcoords" style="width:1100px;height:600px;">
 </div>
+<div id="controls">
+  <label><input type="checkbox" id="chk_histo_status" onclick="toggleHistograms()" checked>En-/disable histograms</label
+<div>
 
 
 <script>
@@ -35,12 +38,18 @@ d3.csv('data/nutrients.csv', function(data) {
   parcoords
     .hideAxis(["name"])
     .composite("darker")
+    .hist.enabled(true)
     .render()
     .shadows()
     .reorderable()
-    .brushMode("1D-axes")  // enable brushing
-    .hist.render();
+    .brushMode("1D-axes");  // enable brushing
 });
+
+function toggleHistograms(_) {
+  var enabled = d3.select("#chk_histo_status").property("checked");
+  parcoords
+    .hist.enabled(enabled);
+}
 </script>
 
 
