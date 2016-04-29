@@ -2295,7 +2295,8 @@ function position(d) {
   var m_histograms = {
     show: false,
     defaulBinCount: 10,
-    cache: undefined
+    cache: undefined,
+    updateEvent: "brush"
   }
 
   var histogram = {}
@@ -2364,7 +2365,21 @@ function position(d) {
     }
 
     return pc;
+  }
 
+  histogram.updateEvent = function(uev) {
+    if (uev !== "brush" && uev !== "brushend") {
+      throw Exception("Invalid update event: " + uev + ". Expected: 'brush' or 'brushend'");
+    }
+
+    if (arguments.length === 0) {
+      return m_histograms.updateEvent;
+    }
+
+    pc.on(m_histograms.updateEvent + ".histogram", null);
+    m_histograms.updateEvent = uev;
+    pc.on(m_histograms.updateEvent + ".histogram", render);
+    return pc;
   }
 
   function init() {
@@ -2447,7 +2462,7 @@ function position(d) {
     });
   }
 
-  pc.on('brush', histogram.render);
+  pc.on(m_histograms.updateEvent + ".histogram", render);
 
   // Expose histogram functionality in parallel cooridinates object.
   pc.hist = histogram;
