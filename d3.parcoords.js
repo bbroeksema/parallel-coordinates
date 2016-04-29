@@ -2357,11 +2357,9 @@ function position(d) {
     }
 
     if (enabled) {
-      pc.on('render.histograms', render)
       var data = pc.brushed() ? pc.brushed() : pc.data();
       render();
     } else {
-      pc.on('render.histograms', null)
       pc.histograms.selectAll('.histogram').remove();
     }
 
