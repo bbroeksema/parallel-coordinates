@@ -43,6 +43,13 @@
       <option value="0.9" selected>0.9</option>
       <option value="1.0">1.0</option>
     </select>
+  </label><br/>
+  <label>
+    Bin count for variable:
+    <select id="slct_variable_bin_count">
+    </select>
+    <input id="inp_bin_count" type="number" min="2" max="20" value="10"></input>
+    <button onclick="updateBinCount()">Update</button>
   </label>
 <div>
 
@@ -76,6 +83,18 @@ d3.csv('data/nutrients.csv', function(data) {
     .shadows()
     .reorderable()
     .brushMode("1D-axes");  // enable brushing
+
+
+  var dims = Object.keys(parcoords.dimensions())
+    .filter(function(dim) { return parcoords.dimensions()[dim].type === "number"; })
+  var sel = d3.select("#slct_variable_bin_count");
+
+  sel.selectAll("option")
+    .data(dims)
+    .enter()
+      .append("option")
+      .attr("value", String)
+      .text(String)
 });
 
 function toggleHistograms(_) {
@@ -100,10 +119,19 @@ function changeDefaultFillOpacity() {
   var sel = document.getElementById('slct_default_fill_opacity');
   var opacity = sel.options[sel.selectedIndex].value;
   parcoords.hist.defaultFillOpacity(opacity);
-
-
-
 }
+
+function updateBinCount() {
+  var elem = document.getElementById('slct_variable_bin_count');
+  var varName = elem.options[elem.selectedIndex].value;
+  elem = document.getElementById('inp_bin_count');
+  var binCount = elem.value;
+
+  parcoords.hist
+    .binCount(varName, binCount)
+    .render();
+}
+
 </script>
 
 
