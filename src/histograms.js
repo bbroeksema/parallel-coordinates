@@ -125,6 +125,7 @@
   }
 
   function init() {
+    var data = pc.data();
     var dims = pc.dimensions();
     m_histograms.cache = {};
 
@@ -140,9 +141,19 @@
       if (dim.type === "number") {
         hist = d3_array.histogram();
 
+        var binCount = histogram.binCount(dimName);
+        var extent = d3.extent(data, function(datum) { return datum[dimName]; });
+        var domain = extent[1] - extent[0];
+        var step = domain / binCount;
+        var thresholds = [];
+
+        for(var i = 1; i < binCount; i++) {
+          thresholds.push(extent[0] + i * step);
+        }
+
         hist
           .value(function(d) { return d[dimName]; })
-          .thresholds(histogram.binCount(dimName))  // See: https://github.com/d3/d3-array#ticks
+          .thresholds(thresholds)
           .domain(dims[dimName].yscale.domain());
 
         m_histograms.cache[dimName] = hist;
