@@ -2357,6 +2357,8 @@ function position(d) {
     }
 
     dim.binCount = count;
+    delete m_histograms.cache;
+    render();
     return pc;
   }
 
@@ -2503,7 +2505,10 @@ function position(d) {
         .attr('x', 0)
         .attr('y', function(d, i) { return yscale(i + 1) + 1; })
         .attr('height', function(d, i) { return yscale(i) - yscale(i + 1) - 1; })
-        .attr('width', function(d) { return d.freq / d.total * 40; })
+        .attr('width', function(d) {
+          var w = d.freq / d.total * 40;
+          return  isNaN(w) ? 0 : w;
+        })
         .style('fill', function() {
            if (m_histograms.colorConfiguration[hist.dim]) {
               return m_histograms.colorConfiguration[hist.dim].fill;
