@@ -2304,7 +2304,8 @@ function position(d) {
     },
     colorConfiguration: {
        "vitaminc (g)": { fill: 'orange', opacity: 0.4 }
-    }
+    },
+    maxBarWidth: 0.8
   }
 
   var histogram = {}
@@ -2404,6 +2405,19 @@ function position(d) {
     return histogram;
   }
 
+  histogram.maxBarWidth = function(width) {
+    if (arguments.lengt === 0) {
+      return m_histograms.maxBarWidth;
+    }
+
+    if (width < 0 || width > 1) {
+      throw Exception("Invalid bar width: value needs to be between 0 and 1");
+    }
+
+    m_histograms.maxBarWidth = width;
+    return histogram;
+  }
+
   histogram.updateEvent = function(uev) {
     if (uev !== "brush" && uev !== "brushend") {
       throw Exception("Invalid update event: " + uev + ". Expected: 'brush' or 'brushend'");
@@ -2423,6 +2437,8 @@ function position(d) {
     var data = pc.brushed() ? pc.brushed() : pc.data();
     var dims = pc.dimensions();
     var cache = m_histograms.cache ? m_histograms.cache : init();
+    var xrange = pc.xscale.range();
+    var maxBinWidth = (xrange[xrange.length - 1] - xrange[0]) / (xrange.length - 1);
 
     if (!data) { throw "Cannot calculate histograms if no data is set yet"; }
 
@@ -2466,7 +2482,7 @@ function position(d) {
         .attr('y', function(d, i) { return yscale(i + 1) + 1; })
         .attr('height', function(d, i) { return yscale(i) - yscale(i + 1) - 1; })
         .attr('width', function(d) {
-          var w = d.freq / d.total * 40;
+          var w = d.freq / d.total * m_histograms.maxBarWidth * maxBinWidth;
           return  isNaN(w) ? 0 : w;
         })
         .style('fill', function() {
