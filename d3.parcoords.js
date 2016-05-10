@@ -2315,7 +2315,7 @@ function position(d) {
     }
 
     m_histograms.show = _;
-    return pc;
+    return histogram;
   }
 
   histogram.defaultBinCount = function(_) {
@@ -2324,7 +2324,8 @@ function position(d) {
     }
 
     m_histograms.defaulBinCount = _;
-    return pc;
+    delete m_histograms.cache;
+    return histogram;
   }
 
   histogram.binCount = function(dimension, count) {
@@ -2349,7 +2350,6 @@ function position(d) {
       } else if (dim.type ==="string") {
         return dims[dimension].yscale.domain().length;
       }
-
     }
 
     if (dim.type !== "number") {
@@ -2358,8 +2358,7 @@ function position(d) {
 
     dim.binCount = count;
     delete m_histograms.cache;
-    render();
-    return pc;
+    return histogram;
   }
 
   histogram.defaultFillColor = function(fill) {
@@ -2369,10 +2368,10 @@ function position(d) {
 
     if (m_histograms.defaultColorConfiguration.fill !== fill) {
       m_histograms.defaultColorConfiguration.fill = fill;
-      render();
+      histogram.render();
     }
 
-    return pc;
+    return histogram;
   }
 
   histogram.defaultFillOpacity = function(opacity) {
@@ -2382,13 +2381,11 @@ function position(d) {
 
     if (m_histograms.defaultColorConfiguration.opacity !== opacity) {
       m_histograms.defaultColorConfiguration.opacity = opacity;
-      render();
+      histogram.render();
     }
 
     return pc;
   }
-
-
 
   histogram.enabled = function(enabled) {
     if (arguments.lengt === 0) {
@@ -2397,14 +2394,14 @@ function position(d) {
 
     if (enabled) {
       var data = pc.brushed() ? pc.brushed() : pc.data();
-      pc.on(m_histograms.updateEvent + ".histogram", render);
-      render();
+      pc.on(m_histograms.updateEvent + ".histogram", histogram.render);
+      histogram.render();
     } else {
       pc.on(m_histograms.updateEvent + ".histogram", undefined);
       pc.histograms.selectAll('.histogram').remove();
     }
 
-    return pc;
+    return histogram;
   }
 
   histogram.updateEvent = function(uev) {
@@ -2419,48 +2416,10 @@ function position(d) {
     pc.on(m_histograms.updateEvent + ".histogram", null);
     m_histograms.updateEvent = uev;
     pc.on(m_histograms.updateEvent + ".histogram", render);
-    return pc;
+    return histogram;
   }
 
-  function init() {
-    var data = pc.data();
-    var dims = pc.dimensions();
-    m_histograms.cache = {};
-
-    Object.keys(dims).forEach(function(dimName) {
-      var dim = dims[dimName];
-      var hist;
-
-      if (dims[dimName].yscale === undefined) {
-        pc.autoscale();
-      }
-
-      // TODO: For now we only create histograms for numerical variables.
-      if (dim.type === "number") {
-        hist = d3_array.histogram();
-
-        var binCount = histogram.binCount(dimName);
-        var extent = dim.yscale.domain();
-        var step = (extent[1] - extent[0]) / binCount;
-        var thresholds = [];
-
-        for(var i = 1; i < binCount; i++) {
-          thresholds.push(extent[0] + i * step);
-        }
-
-        hist
-          .value(function(d) { return d[dimName]; })
-          .thresholds(thresholds)
-          .domain(dims[dimName].yscale.domain());
-
-        m_histograms.cache[dimName] = hist;
-      }
-    });
-
-    return m_histograms.cache;
-  }
-
-  function render() {
+  histogram.render = function() {
     var data = pc.brushed() ? pc.brushed() : pc.data();
     var dims = pc.dimensions();
     var cache = m_histograms.cache ? m_histograms.cache : init();
@@ -2523,6 +2482,44 @@ function position(d) {
            return m_histograms.defaultColorConfiguration.opacity;
         });
     });
+  }
+
+  function init() {
+    var data = pc.data();
+    var dims = pc.dimensions();
+    m_histograms.cache = {};
+
+    Object.keys(dims).forEach(function(dimName) {
+      var dim = dims[dimName];
+      var hist;
+
+      if (dims[dimName].yscale === undefined) {
+        pc.autoscale();
+      }
+
+      // TODO: For now we only create histograms for numerical variables.
+      if (dim.type === "number") {
+        hist = d3_array.histogram();
+
+        var binCount = histogram.binCount(dimName);
+        var extent = dim.yscale.domain();
+        var step = (extent[1] - extent[0]) / binCount;
+        var thresholds = [];
+
+        for(var i = 1; i < binCount; i++) {
+          thresholds.push(extent[0] + i * step);
+        }
+
+        hist
+          .value(function(d) { return d[dimName]; })
+          .thresholds(thresholds)
+          .domain(dims[dimName].yscale.domain());
+
+        m_histograms.cache[dimName] = hist;
+      }
+    });
+
+    return m_histograms.cache;
   }
 
   // Expose histogram functionality in parallel cooridinates object.

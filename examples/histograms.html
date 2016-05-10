@@ -45,10 +45,15 @@
     </select>
   </label><br/>
   <label>
+    Default bin count:
+    <input id="inp_def_bin_count" type="number" min="2" max="50" value="10"></input>
+    <button onclick="updateDefaultBinCount()">Update</button>
+  </label><br />
+  <label>
     Bin count for variable:
     <select id="slct_variable_bin_count">
     </select>
-    <input id="inp_bin_count" type="number" min="2" max="20" value="10"></input>
+    <input id="inp_bin_count" type="number" min="2" max="50" value="10"></input>
     <button onclick="updateBinCount()">Update</button>
   </label>
 <div>
@@ -78,23 +83,24 @@ d3.csv('data/nutrients.csv', function(data) {
   parcoords
     .hideAxis(["name"])
     .composite("darker")
-    .hist.enabled(true)
     .render()
     .shadows()
     .reorderable()
     .brushMode("1D-axes");  // enable brushing
 
+  parcoords
+    .hist.enabled(true);
 
   var dims = Object.keys(parcoords.dimensions())
     .filter(function(dim) { return parcoords.dimensions()[dim].type === "number"; })
-  var sel = d3.select("#slct_variable_bin_count");
 
+  var sel = d3.select("#slct_variable_bin_count");
   sel.selectAll("option")
     .data(dims)
     .enter()
       .append("option")
       .attr("value", String)
-      .text(String)
+      .text(String);
 });
 
 function toggleHistograms(_) {
@@ -119,6 +125,14 @@ function changeDefaultFillOpacity() {
   var sel = document.getElementById('slct_default_fill_opacity');
   var opacity = sel.options[sel.selectedIndex].value;
   parcoords.hist.defaultFillOpacity(opacity);
+}
+
+function updateDefaultBinCount() {
+  var elem = document.getElementById('inp_def_bin_count');
+
+  parcoords.hist
+    .defaultBinCount(elem.value)
+    .render();
 }
 
 function updateBinCount() {
