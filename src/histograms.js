@@ -9,7 +9,6 @@
       opacity: 0.9
     },
     colorConfiguration: {
-       "vitaminc (g)": { fill: 'orange', opacity: 0.4 }
     },
     maxBarWidth: 0.8
   }
@@ -92,6 +91,52 @@
     }
 
     return pc;
+  }
+
+  histogram.fillColor = function(dimension, fill) {
+    var colorCfg = m_histograms.colorConfiguration[dimension];
+
+    if(arguments.length === 0) {
+      throw Exception("histogram.fillColor: you have to pass at least a dimension");
+    }
+
+    if (arguments.length === 1) {
+      if (colorCfg && colorCfg.fill) {
+        return colorCfg.fill;
+      }
+
+      return histogram.defaultFillColor();
+    }
+
+    if (colorCfg === undefined) {
+      m_histograms.colorConfiguration[dimension] = {};
+    }
+
+    m_histograms.colorConfiguration[dimension].fill = fill;
+    return histogram;
+  }
+
+  histogram.fillOpacity = function(dimension, opacity) {
+    var colorCfg = m_histograms.colorConfiguration[dimension];
+
+    if(arguments.length === 0) {
+      throw Exception("histogram.fillOpacity: you have to pass at least a dimension");
+    }
+
+    if (arguments.length === 1) {
+      if (colorCfg && colorCfg.opacity) {
+        return colorCfg.opacity;
+      }
+
+      return histogram.defaultFillOpacity();
+    }
+
+    if (colorCfg === undefined) {
+      m_histograms.colorConfiguration[dimension] = {};
+    }
+
+    m_histograms.colorConfiguration[dimension].opacity = opacity;
+    return histogram;
   }
 
   histogram.enabled = function(enabled) {
@@ -192,16 +237,10 @@
           return  isNaN(w) ? 0 : w;
         })
         .style('fill', function() {
-           if (m_histograms.colorConfiguration[hist.dim]) {
-              return m_histograms.colorConfiguration[hist.dim].fill;
-           }
-           return m_histograms.defaultColorConfiguration.fill;
+           return histogram.fillColor(hist.dim);
         })
         .style('fill-opacity', function() {
-           if (m_histograms.colorConfiguration[hist.dim]) {
-              return m_histograms.colorConfiguration[hist.dim].opacity;
-           }
-           return m_histograms.defaultColorConfiguration.opacity;
+           return histogram.fillOpacity(hist.dim);
         });
     });
   }
