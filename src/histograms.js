@@ -144,9 +144,8 @@
         hist = d3_array.histogram();
 
         var binCount = histogram.binCount(dimName);
-        var extent = d3.extent(data, function(datum) { return datum[dimName]; });
-        var domain = extent[1] - extent[0];
-        var step = domain / binCount;
+        var extent = dim.yscale.domain();
+        var step = (extent[1] - extent[0]) / binCount;
         var thresholds = [];
 
         for(var i = 1; i < binCount; i++) {
