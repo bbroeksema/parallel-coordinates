@@ -76,10 +76,7 @@ var blue_to_brown = d3.scale.linear()
 
 var color = function(d) { return blue_to_brown(d['carbohydrate (g)']); };
 
-var parcoords = d3.parcoords()("#example")
-    .color(color)
-    .alpha(0.4)
-    .dimensionTitleRotation(-10);
+var parcoords = d3.parcoords()("#example");
 
 // load csv file and create the chart
 d3.csv('data/nutrients.csv', function(data) {
@@ -88,10 +85,14 @@ d3.csv('data/nutrients.csv', function(data) {
   parcoords
     .hideAxis(["name"])
     .composite("darker")
-    .render()
     .shadows()
     .reorderable()
-    .brushMode("1D-axes");  // enable brushing
+    .color(color)
+    .alpha(0.4)
+    .dimensionTitleRotation(-10)
+    .brushMode("1D-axes")  // enable brushing
+    .mode("queue")
+    .render();
 
   parcoords
     .hist.enabled(true);
