@@ -2397,8 +2397,10 @@ function position(d) {
 
     if (enabled) {
       var data = pc.brushed() ? pc.brushed() : pc.data();
+      pc.on(m_histograms.updateEvent + ".histogram", render);
       render();
     } else {
+      pc.on(m_histograms.updateEvent + ".histogram", undefined);
       pc.histograms.selectAll('.histogram').remove();
     }
 
@@ -2522,8 +2524,6 @@ function position(d) {
         });
     });
   }
-
-  pc.on(m_histograms.updateEvent + ".histogram", render);
 
   // Expose histogram functionality in parallel cooridinates object.
   pc.hist = histogram;
