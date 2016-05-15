@@ -224,7 +224,7 @@
 
       var yscale = d3.scale.linear()
         .domain([0, hist.hist.length])
-        .range(pc.dimensions()[hist.dim].yscale.range())
+        .range(pc.dimensions()[hist.dim].yscale.range());
 
       bars.enter().append('rect');
       bars.exit().remove();
