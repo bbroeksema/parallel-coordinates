@@ -239,6 +239,9 @@
         .style('fill', function() {
            return histogram.fillColor(hist.dim);
         })
+        .style('stroke', function() {
+          return d3.rgb(histogram.fillColor(hist.dim)).darker().darker();
+        })
         .style('fill-opacity', function() {
            return histogram.fillOpacity(hist.dim);
         });
