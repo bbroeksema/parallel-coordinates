@@ -2304,7 +2304,11 @@ function position(d) {
     },
     colorConfiguration: {
     },
-    maxBarWidth: 0.8
+    maxBarWidth: 0.8,
+    labels: {
+      enabled: false,
+      mode: 'absolute' // or relative
+    }
   }
 
   var histogram = {}
@@ -2450,6 +2454,27 @@ function position(d) {
     return histogram;
   }
 
+  histogram.labels = function(enabled) {
+    if (arguments.lengt === 0) {
+      return m_histograms.labels;
+    }
+    m_histograms.labels.enabled = enabled;
+    return histogram;
+  }
+
+  histogram.labelsMode = function(mode) {
+    if (arguments.lengt === 0) {
+      return m_histograms.labels.mode;
+    }
+
+    if (mode !== 'relative' && mode !== 'absolute') {
+      throw Exception('Invalid label mode, must be one of: relative or absolute');
+    }
+
+    m_histograms.labels.mode = mode;
+    return histogram;
+  }
+
   histogram.maxBarWidth = function(width) {
     if (arguments.lengt === 0) {
       return m_histograms.maxBarWidth;
@@ -2516,9 +2541,12 @@ function position(d) {
       var bars = d3.select(this).selectAll('rect')
         .data(function(d) { return d.hist; });
 
+      var labels = d3.select(this).selectAll('text')
+        .data(function(d) { return d.hist; });
+
       var yscale = d3.scale.linear()
         .domain([0, hist.hist.length])
-        .range(pc.dimensions()[hist.dim].yscale.range())
+        .range(pc.dimensions()[hist.dim].yscale.range());
 
       bars.enter().append('rect');
       bars.exit().remove();
@@ -2533,9 +2561,30 @@ function position(d) {
         .style('fill', function() {
            return histogram.fillColor(hist.dim);
         })
+        .style('stroke', function() {
+          return d3.rgb(histogram.fillColor(hist.dim)).darker().darker();
+        })
         .style('fill-opacity', function() {
            return histogram.fillOpacity(hist.dim);
         });
+
+      if (m_histograms.labels.enabled) {
+        labels.enter().append('text');
+        labels.exit().remove();
+        labels
+          .attr('x', 2)
+          .attr('y', function(d, i) { return yscale(i + 0.5); })
+          .attr('alignment-baseline', 'middle')
+          .text(function(d) {
+            if (m_histograms.labels.mode === 'absolute') {
+              return d.freq;
+            } else {
+              return (d.freq / d.total).toFixed(2);
+            }
+          });
+      } else {
+        labels.remove();
+      }
     });
   }
 
