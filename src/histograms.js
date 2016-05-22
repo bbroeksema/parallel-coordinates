@@ -223,7 +223,7 @@
     Object.keys(cache).forEach(function(dimName) {
       var h = cache[dimName](data);
       var bins = h.map(function(bin) {
-        return { freq: bin.length, total: data.length };
+        return { freq: bin.length, total: data.length, value: bin.value };
       });
 
       histograms.push({
@@ -252,14 +252,33 @@
 
       var yscale = d3.scale.linear()
         .domain([0, hist.hist.length])
-        .range(pc.dimensions()[hist.dim].yscale.range());
+        .range(getRange());
+
+      var dimType = pc.dimensions()[hist.dim].type;
+      if (dimType === 'string') {
+        yscale = pc.dimensions()[hist.dim].yscale;
+      }
+
+      var barheight = (getRange()[0] - getRange()[1]) / hist.hist.length - 2;
 
       bars.enter().append('rect');
       bars.exit().remove();
       bars
         .attr('x', 0)
-        .attr('y', function(d, i) { return yscale(i + 1) + 1; })
-        .attr('height', function(d, i) { return yscale(i) - yscale(i + 1) - 1; })
+        .attr('y', function(d, i) {
+          if (dimType === 'string') {
+            return yscale(d.value) - Math.round(barheight / 2);
+          } else {
+            return yscale(i + 1) + 1;
+          }
+        })
+        .attr('height', function(d, i) {
+          if (dimType === 'string') {
+            return barheight;
+          } else {
+            return yscale(i) - yscale(i + 1) - 1;
+          }
+        })
         .attr('width', function(d) {
           var w = d.freq / d.total * m_histograms.maxBarWidth * maxBinWidth;
           return  isNaN(w) ? 0 : w;
@@ -279,7 +298,13 @@
         labels.exit().remove();
         labels
           .attr('x', 2)
-          .attr('y', function(d, i) { return yscale(i + 0.5); })
+          .attr('y', function(d, i) {
+            if (dimType === 'string') {
+              return yscale(d.value);
+            } else {
+              return yscale(i + 0.5);
+            }
+          })
           .attr('alignment-baseline', 'middle')
           .text(function(d) {
             if (m_histograms.labels.mode === 'absolute') {
@@ -325,6 +350,27 @@
           .thresholds(thresholds)
           .domain(dims[dimName].yscale.domain());
 
+        m_histograms.cache[dimName] = hist;
+      } else {
+
+        function hist(data) {
+          var domain = dims[dimName].yscale.domain();
+          var counts = {};
+
+          data.forEach(function(d) {
+            var value = d[dimName];
+            counts[value] = counts[value] || [];
+            counts[value].push(d);
+          });
+
+          var bins = [];
+          domain.forEach(function(value) {
+            var bin = counts[value] || [];
+            bin.value = value;
+            bins.push(bin);
+          });
+          return bins;
+        }
         m_histograms.cache[dimName] = hist;
       }
     });
