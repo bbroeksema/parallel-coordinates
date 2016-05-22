@@ -2499,7 +2499,7 @@ function position(d) {
 
     pc.on(m_histograms.updateEvent + ".histogram", null);
     m_histograms.updateEvent = uev;
-    pc.on(m_histograms.updateEvent + ".histogram", render);
+    pc.on(m_histograms.updateEvent + ".histogram", histogram.render);
     return histogram;
   }
 
