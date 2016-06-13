@@ -2445,9 +2445,14 @@ function position(d) {
     if (enabled) {
       var data = pc.brushed() ? pc.brushed() : pc.data();
       pc.on(m_histograms.updateEvent + ".histogram", histogram.render);
+      pc.on('axesreorder.histograms', function() {
+        init();
+        histogram.render();
+      });
       histogram.render();
     } else {
       pc.on(m_histograms.updateEvent + ".histogram", undefined);
+      pc.on('axesreorder.histograms', undefined);
       pc.histograms.selectAll('.histogram').remove();
     }
 
